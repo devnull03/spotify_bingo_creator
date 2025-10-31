@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      oot-bingo-generator:
+        specifier: ^2.0.0
+        version: 2.0.0
       valibot:
         specifier: ^1.1.0
         version: 1.1.0(typescript@5.9.3)
@@ -811,6 +814,9 @@ packages:
     resolution: {integrity: sha512-ieGu42u/Qsa4TFktmaKEwM6MQH0pOWnaB3htzh0JRtx84+Mebc0cbZYN5bC+6WTZ4+77xrL9Pn5m7CV6VIkV7A==}
     engines: {node: ^18.17.0 || >=20.5.0}
     hasBin: true
+
+  oot-bingo-generator@2.0.0:
+    resolution: {integrity: sha512-Svbmv2wZ9qdmVbYjN4VpVqN4UdYgfU9r29cQtsqdlEks49x+0iBZc+O4H8souVBKKW3TmIEhMGNdnicia8Jl7Q==}
 
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
@@ -1630,6 +1636,8 @@ snapshots:
   nopt@8.1.0:
     dependencies:
       abbrev: 3.0.1
+
+  oot-bingo-generator@2.0.0: {}
 
   package-json-from-dist@1.0.1: {}
 
