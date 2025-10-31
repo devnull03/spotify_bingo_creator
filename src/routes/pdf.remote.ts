@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 import { query } from '$app/server';
-import { generateBingoBoardsPDF, generateBingoBoardsPDFZip } from '$lib/server/pdf-export';
+import { generateBingoBoardsCanvasPDF, generateBingoBoardsImagesZip } from '$lib/server/canvas-pdf-export';
 import { generateMultipleBoards } from '$lib/utils/bingo';
 import { getPlaylistFromLink } from '$lib/server/spotify';
 
@@ -12,7 +12,8 @@ interface PDFExportRequest {
 }
 
 /**
- * Export bingo boards as a single PDF
+ * Export bingo boards as a single PDF with full Unicode support
+ * Uses Canvas rendering for proper Japanese and international character support
  */
 export const exportPDF = query(
 	v.pipe(
@@ -35,8 +36,8 @@ export const exportPDF = query(
 			data.includeFreeSpace
 		);
 
-		// Generate PDF
-		const buffer = await generateBingoBoardsPDF(boards, data.includeFreeSpace);
+		// Generate PDF with Canvas (full Unicode support)
+		const buffer = await generateBingoBoardsCanvasPDF(boards, data.includeFreeSpace);
 
 		// Convert buffer to base64 for transmission
 		const base64 = buffer.toString('base64');
@@ -50,7 +51,8 @@ export const exportPDF = query(
 );
 
 /**
- * Export bingo boards as individual PDFs in a ZIP file
+ * Export bingo boards as individual PNG images in a ZIP file
+ * Uses Canvas for better international character support (Japanese, Chinese, etc.)
  */
 export const exportZIP = query(
 	v.pipe(
@@ -73,8 +75,8 @@ export const exportZIP = query(
 			data.includeFreeSpace
 		);
 
-		// Generate ZIP with individual PDFs
-		const buffer = await generateBingoBoardsPDFZip(boards, data.includeFreeSpace);
+		// Generate ZIP with individual PNG images (better Unicode support)
+		const buffer = await generateBingoBoardsImagesZip(boards, data.includeFreeSpace);
 
 		// Convert buffer to base64 for transmission
 		const base64 = buffer.toString('base64');

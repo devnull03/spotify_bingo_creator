@@ -141,11 +141,11 @@
 			</button>
 			{#if boards.length > 0}
 				<button onclick={handleExportPDF} disabled={isExporting} class="btn btn-success">
-					{isExporting ? '📥 Exporting...' : '📄 Export PDF'}
+					{isExporting ? '📥 Exporting...' : '📄 Export PDF (All Languages)'}
 				</button>
 				{#if boardCount > 1}
 					<button onclick={handleExportZip} disabled={isExporting} class="btn btn-success">
-						{isExporting ? '📥 Exporting...' : '📦 Export ZIP'}
+						{isExporting ? '📥 Exporting...' : '📦 Export ZIP (PNG)'}
 					</button>
 				{/if}
 				<button onclick={handlePrint} class="btn btn-secondary"> 🖨️ Print Boards </button>

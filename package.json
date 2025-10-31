@@ -28,8 +28,10 @@
 		"vite": "^7.1.10"
 	},
 	"dependencies": {
+		"@napi-rs/canvas": "^0.1.81",
 		"jszip": "^3.10.1",
 		"oot-bingo-generator": "^2.0.0",
+		"pdf-lib": "^1.17.1",
 		"pdfmake": "^0.2.20",
 		"valibot": "^1.1.0"
 	}

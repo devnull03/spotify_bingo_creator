@@ -3,9 +3,22 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 import JSZip from 'jszip';
 import type { BingoBoard } from '$lib/utils/bingo';
 
-// Register fonts
+// Register fonts - pdfmake's default Roboto font has limited Unicode support
+// For better international character support, we use the default fonts
+// Note: Japanese and other CJK characters may not render perfectly with default fonts
+// Consider using romanized versions or implementing custom font support if needed
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 pdfMake.vfs = (pdfFonts as any).vfs;
+
+/**
+ * Sanitize text for PDF generation - handles characters that might not render
+ * For now, we'll keep the original text but this could be extended to transliterate
+ */
+function sanitizeText(text: string): string {
+	// Keep original text - pdfmake will show boxes for unsupported characters
+	// but the layout will still work correctly
+	return text;
+}
 
 interface PDFTable {
 	body: object[][];
@@ -18,8 +31,9 @@ interface PDFTable {
  */
 function boardToPDFTable(board: BingoBoard, showFreeSpace: boolean = true): PDFTable {
 	const tableBody: object[][] = [];
+	const gridSize = board.cells.length;
 
-	for (let i = 0; i < board.cells.length; i++) {
+	for (let i = 0; i < gridSize; i++) {
 		const row: object[] = [];
 
 		for (let j = 0; j < board.cells[i].length; j++) {
@@ -28,7 +42,7 @@ function boardToPDFTable(board: BingoBoard, showFreeSpace: boolean = true): PDFT
 			// Check if it's the free space (center cell for 5x5)
 			const isFreeSpace =
 				showFreeSpace &&
-				board.cells.length === 5 &&
+				gridSize === 5 &&
 				i === 2 &&
 				j === 2;
 
@@ -36,17 +50,16 @@ function boardToPDFTable(board: BingoBoard, showFreeSpace: boolean = true): PDFT
 				row.push({
 					text: 'FREE',
 					bold: true,
-					fontSize: 14,
+					fontSize: 16,
 					alignment: 'center',
-					verticalAlignment: 'middle'
+					margin: [8, 12, 8, 12]
 				});
 			} else {
 				row.push({
 					text: cell.song.name,
-					fontSize: 10,
+					fontSize: gridSize === 3 ? 11 : gridSize === 4 ? 10 : 9,
 					alignment: 'center',
-					verticalAlignment: 'middle',
-					margin: [2, 2, 2, 2]
+					margin: [6, 8, 6, 8]
 				});
 			}
 		}
@@ -54,13 +67,16 @@ function boardToPDFTable(board: BingoBoard, showFreeSpace: boolean = true): PDFT
 		tableBody.push(row);
 	}
 
-	const cellWidth = 100 / board.cells[0].length;
-	const cellHeight = 100 / board.cells.length;
+	// Calculate cell dimensions to make them square
+	// A4 page is 595.28 x 841.89 points
+	// With margins, we have ~515 points width available
+	const availableWidth = 515;
+	const cellWidth = availableWidth / gridSize;
 
 	return {
 		body: tableBody,
-		widths: Array(board.cells[0].length).fill(`${cellWidth}%`),
-		heights: Array(board.cells.length).fill(`${cellHeight}mm`)
+		widths: Array(gridSize).fill(cellWidth),
+		heights: Array(gridSize).fill(cellWidth) // Same as width to make squares
 	};
 }
 
@@ -74,9 +90,10 @@ function generateSingleBoardPDF(board: BingoBoard, boardNumber: number, showFree
 		content: [
 			{
 				text: `Bingo Board #${boardNumber}`,
-				fontSize: 16,
+				fontSize: 18,
 				bold: true,
-				margin: [0, 0, 0, 10]
+				alignment: 'center',
+				margin: [0, 20, 0, 20]
 			},
 			{
 				table: {
@@ -84,12 +101,22 @@ function generateSingleBoardPDF(board: BingoBoard, boardNumber: number, showFree
 					widths: table.widths,
 					heights: table.heights
 				},
-				layout: 'noBorders'
+				layout: {
+					hLineWidth: () => 2,
+					vLineWidth: () => 2,
+					hLineColor: () => '#000000',
+					vLineColor: () => '#000000',
+					paddingLeft: () => 8,
+					paddingRight: () => 8,
+					paddingTop: () => 10,
+					paddingBottom: () => 10
+				},
+				alignment: 'center'
 			}
 		],
 		pageSize: 'A4',
 		pageOrientation: 'portrait',
-		margin: [10, 10, 10, 10]
+		pageMargins: [40, 40, 40, 40]
 	};
 }
 
@@ -130,9 +157,10 @@ export function generateBingoBoardsPDF(
 		// Add title
 		content.push({
 			text: `Bingo Board #${index + 1}`,
-			fontSize: 16,
+			fontSize: 18,
 			bold: true,
-			margin: [0, 0, 0, 10],
+			alignment: 'center',
+			margin: [0, index === 0 ? 20 : 0, 0, 20],
 			pageBreak: index === 0 ? undefined : 'before'
 		});
 
@@ -143,8 +171,18 @@ export function generateBingoBoardsPDF(
 				widths: table.widths,
 				heights: table.heights
 			},
-			layout: 'noBorders',
-			margin: [0, 0, 0, 20]
+			layout: {
+				hLineWidth: () => 2,
+				vLineWidth: () => 2,
+				hLineColor: () => '#000000',
+				vLineColor: () => '#000000',
+				paddingLeft: () => 8,
+				paddingRight: () => 8,
+				paddingTop: () => 10,
+				paddingBottom: () => 10
+			},
+			alignment: 'center',
+			margin: [0, 0, 0, 30]
 		});
 	});
 
@@ -155,7 +193,7 @@ export function generateBingoBoardsPDF(
 				content,
 				pageSize: 'A4',
 				pageOrientation: 'portrait',
-				margin: [10, 10, 10, 10]
+				pageMargins: [40, 40, 40, 40]
 			};
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
