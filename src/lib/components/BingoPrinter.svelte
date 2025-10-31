@@ -1,6 +1,7 @@
 <script lang="ts">
 	import SimpleBingoBoard from './SimpleBingoBoard.svelte';
 	import { generateMultipleBoards } from '$lib/utils/bingo';
+	import { exportPDF, exportZIP } from '../../routes/pdf.remote.js';
 	import type { BingoBoard } from '$lib/utils/bingo';
 	import type { PlaylistData } from '$lib/interfaces/spotify.interface';
 
@@ -15,6 +16,7 @@
 	let boardSize: number = $state(5);
 	let includeFreeSpace: boolean = $state(true);
 	let error: string | null = $state(null);
+	let isExporting: boolean = $state(false);
 
 	function generateBoards() {
 		error = null;
@@ -23,6 +25,64 @@
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to generate boards';
 			boards = [];
+		}
+	}
+
+	/**
+	 * Download a base64 encoded blob with the given filename
+	 */
+	function downloadBase64Blob(base64: string, filename: string) {
+		const binaryString = atob(base64);
+		const bytes = new Uint8Array(binaryString.length);
+		for (let i = 0; i < binaryString.length; i++) {
+			bytes[i] = binaryString.charCodeAt(i);
+		}
+		const blob = new Blob([bytes]);
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = filename;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
+	}
+
+	async function handleExportPDF() {
+		if (boards.length === 0) return;
+
+		isExporting = true;
+		try {
+			const result = await exportPDF({
+				playlistLink: playlist.playlistLink,
+				boardCount,
+				boardSize,
+				includeFreeSpace
+			});
+			downloadBase64Blob(result.buffer, result.filename);
+		} catch (err) {
+			error = `Failed to export PDF: ${err instanceof Error ? err.message : 'Unknown error'}`;
+		} finally {
+			isExporting = false;
+		}
+	}
+
+	async function handleExportZip() {
+		if (boards.length === 0) return;
+
+		isExporting = true;
+		try {
+			const result = await exportZIP({
+				playlistLink: playlist.playlistLink,
+				boardCount,
+				boardSize,
+				includeFreeSpace
+			});
+			downloadBase64Blob(result.buffer, result.filename);
+		} catch (err) {
+			error = `Failed to export ZIP: ${err instanceof Error ? err.message : 'Unknown error'}`;
+		} finally {
+			isExporting = false;
 		}
 	}
 
@@ -75,11 +135,19 @@
 			</div>
 		</div>
 
-		<div class="mt-6 flex gap-3">
+		<div class="mt-6 flex gap-3 flex-wrap">
 			<button onclick={generateBoards} class="btn btn-primary">
 				Generate {boardCount} Board{boardCount !== 1 ? 's' : ''}
 			</button>
 			{#if boards.length > 0}
+				<button onclick={handleExportPDF} disabled={isExporting} class="btn btn-success">
+					{isExporting ? '📥 Exporting...' : '📄 Export PDF'}
+				</button>
+				{#if boardCount > 1}
+					<button onclick={handleExportZip} disabled={isExporting} class="btn btn-success">
+						{isExporting ? '📥 Exporting...' : '📦 Export ZIP'}
+					</button>
+				{/if}
 				<button onclick={handlePrint} class="btn btn-secondary"> 🖨️ Print Boards </button>
 				<button onclick={handleReset} class="btn btn-secondary"> Clear </button>
 			{/if}
@@ -197,6 +265,17 @@
 		background-color: #059669;
 		transform: translateY(-2px);
 		box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+	}
+
+	.btn-success {
+		background-color: #3b82f6;
+		color: white;
+	}
+
+	.btn-success:hover:not(:disabled) {
+		background-color: #2563eb;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 	}
 
 	.btn-secondary {
