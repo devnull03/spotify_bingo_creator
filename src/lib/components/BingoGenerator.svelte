@@ -81,7 +81,7 @@
 </script>
 
 <div class="bingo-generator">
-	<div class="generator-controls bg-gray-800 rounded-lg p-6 mb-8">
+    <div class="generator-controls p-6 mb-8">
 		<h2 class="text-2xl font-bold mb-4">Bingo Board Generator</h2>
 
 		<div class="controls-grid">
@@ -108,8 +108,8 @@
 		{/if}
 
 		{#if board}
-			<div class="board-info mt-4 p-4 bg-gray-900 rounded">
-				<p class="text-sm text-gray-300">
+            <div class="board-info mt-4 p-4 border border-black">
+                <p class="text-sm">
 					Board ID: <code class="text-xs">{board.id}</code>
 				</p>
 			</div>
@@ -139,9 +139,9 @@
 		width: 100%;
 	}
 
-	.generator-controls {
-		border-left: 4px solid #10b981;
-	}
+    .generator-controls {
+        border: 1px solid #000;
+    }
 
 	.controls-grid {
 		display: grid;
@@ -154,85 +154,68 @@
 		flex-direction: column;
 	}
 
-	.control-group label {
-		color: #e5e7eb;
-	}
+    .control-group label {
+        color: #000;
+    }
 
-	.board-size-select {
-		padding: 8px 12px;
-		background-color: #1f2937;
-		color: white;
-		border: 2px solid #374151;
-		border-radius: 6px;
-		font-size: 0.9rem;
-		cursor: pointer;
-		transition: border-color 0.2s;
-	}
+    .board-size-select {
+        padding: 8px 12px;
+        background-color: #fff;
+        color: #000;
+        border: 1px solid #000;
+        border-radius: 0;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
 
-	.board-size-select:hover {
-		border-color: #4b5563;
-	}
+    .board-size-select:hover {}
 
-	.board-size-select:focus {
-		outline: none;
-		border-color: #10b981;
-		box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-	}
+    .board-size-select:focus {
+        outline: none;
+        border-color: #000;
+    }
 
-	.btn {
-		padding: 10px 16px;
-		border: none;
-		border-radius: 6px;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-		font-size: 0.9rem;
-	}
+    .btn {
+        padding: 10px 16px;
+        border: 1px solid #000;
+        border-radius: 0;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.9rem;
+        background: #fff;
+        color: #000;
+    }
 
-	.btn:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
-	.btn-primary {
-		background-color: #10b981;
-		color: white;
-	}
+    .btn-primary {}
 
-	.btn-primary:hover:not(:disabled) {
-		background-color: #059669;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-	}
+    .btn-primary:hover:not(:disabled) {}
 
-	.btn-secondary {
-		background-color: #6b7280;
-		color: white;
-	}
+    .btn-secondary {}
 
-	.btn-secondary:hover:not(:disabled) {
-		background-color: #4b5563;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
-	}
+    .btn-secondary:hover:not(:disabled) {}
 
-	.alert {
-		padding: 12px 16px;
-		border-radius: 6px;
-	}
+    .alert {
+        padding: 12px 16px;
+        border: 1px solid #000;
+        border-radius: 0;
+        background: #fff;
+        color: #000;
+    }
 
-	.alert-error {
-		background-color: #7f1d1d;
-		color: #fca5a5;
-		border-left: 4px solid #dc2626;
-	}
+    .alert-error {}
 
-	.board-container {
-		background-color: #1a1a1a;
-		padding: 24px;
-		border-radius: 12px;
-		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-	}
+    .board-container {
+        background-color: #fff;
+        padding: 24px;
+        border: 1px solid #000;
+        border-radius: 0;
+        box-shadow: none;
+    }
 
 	.board-actions {
 		padding: 0 8px;

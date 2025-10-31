@@ -97,7 +97,7 @@
 </script>
 
 <div class="bingo-printer">
-	<div class="printer-controls bg-gray-800 rounded-lg p-6 mb-8">
+    <div class="printer-controls p-6 mb-8">
 		<h2 class="text-2xl font-bold mb-4">Print Bingo Boards</h2>
 
 		<div class="controls-grid">
@@ -135,16 +135,16 @@
 			</div>
 		</div>
 
-		<div class="mt-6 flex gap-3 flex-wrap">
+        <div class="mt-6 flex gap-3 flex-wrap">
 			<button onclick={generateBoards} class="btn btn-primary">
 				Generate {boardCount} Board{boardCount !== 1 ? 's' : ''}
 			</button>
 			{#if boards.length > 0}
-				<button onclick={handleExportPDF} disabled={isExporting} class="btn btn-success">
+                <button onclick={handleExportPDF} disabled={isExporting} class="btn btn-primary">
 					{isExporting ? '📥 Exporting...' : '📄 Export PDF (All Languages)'}
 				</button>
 				{#if boardCount > 1}
-					<button onclick={handleExportZip} disabled={isExporting} class="btn btn-success">
+                    <button onclick={handleExportZip} disabled={isExporting} class="btn btn-primary">
 						{isExporting ? '📥 Exporting...' : '📦 Export ZIP (PNG)'}
 					</button>
 				{/if}
@@ -153,14 +153,14 @@
 			{/if}
 		</div>
 
-		{#if error}
-			<div class="alert alert-error mt-4">
+        {#if error}
+            <div class="alert mt-4">
 				{error}
 			</div>
 		{/if}
 
-		{#if boards.length > 0}
-			<div class="alert alert-info mt-4">
+        {#if boards.length > 0}
+            <div class="alert mt-4">
 				Generated {boards.length} board{boards.length !== 1 ? 's' : ''} with {boardSize}×{boardSize}
 				grid
 				{#if includeFreeSpace && boardSize === 5}
@@ -171,9 +171,9 @@
 	</div>
 
 	{#if boards.length > 0}
-		<div class="boards-container">
+        <div class="boards-container">
 			<div class="print-instruction">
-				<p class="text-xs text-gray-500 mb-4">
+                <p class="text-xs mb-4">
 					💡 Tip: Use Ctrl+P (or Cmd+P) to print to PDF or paper
 				</p>
 			</div>
@@ -195,9 +195,9 @@
 		width: 100%;
 	}
 
-	.printer-controls {
-		border-left: 4px solid #10b981;
-	}
+    .printer-controls {
+        border: 1px solid black;
+    }
 
 	.controls-grid {
 		display: grid;
@@ -211,106 +211,79 @@
 		flex-direction: column;
 	}
 
-	.control-group label {
-		color: #e5e7eb;
-	}
+    .control-group label {
+        color: #000;
+    }
 
-	.input-field {
-		padding: 8px 12px;
-		background-color: #1f2937;
-		color: white;
-		border: 2px solid #374151;
-		border-radius: 6px;
-		font-size: 0.9rem;
-		cursor: pointer;
-		transition: border-color 0.2s;
-	}
+    .input-field {
+        padding: 8px 12px;
+        background-color: #fff;
+        color: #000;
+        border: 1px solid #000;
+        border-radius: 0;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
 
-	.input-field:hover {
-		border-color: #4b5563;
-	}
+    .input-field:hover {}
 
-	.input-field:focus {
-		outline: none;
-		border-color: #10b981;
-		box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-	}
+    .input-field:focus {
+        outline: none;
+        border-color: #000;
+    }
 
 	.input-field:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
 
-	.btn {
-		padding: 10px 16px;
-		border: none;
-		border-radius: 6px;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-		font-size: 0.9rem;
-	}
+    .btn {
+        padding: 10px 16px;
+        border: 1px solid #000;
+        border-radius: 0;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.9rem;
+        background: #fff;
+        color: #000;
+    }
 
 	.btn:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
 
-	.btn-primary {
-		background-color: #10b981;
-		color: white;
-	}
+    .btn-primary {}
 
-	.btn-primary:hover:not(:disabled) {
-		background-color: #059669;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-	}
+    .btn-primary:hover:not(:disabled) {}
 
-	.btn-success {
-		background-color: #3b82f6;
-		color: white;
-	}
+    .btn-success {}
 
-	.btn-success:hover:not(:disabled) {
-		background-color: #2563eb;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-	}
+    .btn-success:hover:not(:disabled) {}
 
-	.btn-secondary {
-		background-color: #6b7280;
-		color: white;
-	}
+    .btn-secondary {}
 
-	.btn-secondary:hover:not(:disabled) {
-		background-color: #4b5563;
-		transform: translateY(-2px);
-	}
+    .btn-secondary:hover:not(:disabled) {}
 
-	.alert {
-		padding: 12px 16px;
-		border-radius: 6px;
-	}
+    .alert {
+        padding: 12px 16px;
+        border: 1px solid #000;
+        border-radius: 0;
+        background: #fff;
+        color: #000;
+    }
 
-	.alert-error {
-		background-color: #7f1d1d;
-		color: #fca5a5;
-		border-left: 4px solid #dc2626;
-	}
+    .alert-error {}
 
-	.alert-info {
-		background-color: #1e3a5f;
-		color: #bfdbfe;
-		border-left: 4px solid #3b82f6;
-	}
+    .alert-info {}
 
-	.boards-container {
-		background: white;
-		padding: 20px;
-		border-radius: 8px;
-		margin-top: 20px;
-	}
+    .boards-container {
+        background: white;
+        padding: 20px;
+        border: 1px solid #000;
+        border-radius: 0;
+        margin-top: 20px;
+    }
 
 	.print-instruction {
 		text-align: center;
