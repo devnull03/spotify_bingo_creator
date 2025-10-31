@@ -1,14 +1,20 @@
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+import PdfPrinter from 'pdfmake';
+import path from 'node:path';
 import JSZip from 'jszip';
 import type { BingoBoard } from '$lib/utils/bingo';
 
-// Register fonts - pdfmake's default Roboto font has limited Unicode support
-// For better international character support, we use the default fonts
-// Note: Japanese and other CJK characters may not render perfectly with default fonts
-// Consider using romanized versions or implementing custom font support if needed
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-pdfMake.vfs = (pdfFonts as any).vfs;
+// Resolve absolute path to the Noto Sans JP font bundled in the repo root
+const NOTO_SANS_JP_PATH = path.join(process.cwd(), 'NotoSansJP-VariableFont_wght.ttf');
+
+// Configure pdfmake for server-side rendering with custom font
+const printer = new PdfPrinter({
+	NotoSansJP: {
+		normal: NOTO_SANS_JP_PATH,
+		bold: NOTO_SANS_JP_PATH,
+		italics: NOTO_SANS_JP_PATH,
+		bolditalics: NOTO_SANS_JP_PATH
+	}
+});
 
 /**
  * Sanitize text for PDF generation - handles characters that might not render
@@ -87,15 +93,8 @@ function generateSingleBoardPDF(board: BingoBoard, boardNumber: number, showFree
 	const table = boardToPDFTable(board, showFreeSpace);
 
 	return {
-		content: [
-			{
-				text: `Bingo Board #${boardNumber}`,
-				fontSize: 18,
-				bold: true,
-				alignment: 'center',
-				margin: [0, 20, 0, 20]
-			},
-			{
+        content: [
+            {
 				table: {
 					body: table.body,
 					widths: table.widths,
@@ -116,7 +115,8 @@ function generateSingleBoardPDF(board: BingoBoard, boardNumber: number, showFree
 		],
 		pageSize: 'A4',
 		pageOrientation: 'portrait',
-		pageMargins: [40, 40, 40, 40]
+        pageMargins: [40, 40, 40, 40],
+        defaultStyle: { font: 'NotoSansJP' }
 	};
 }
 
@@ -128,17 +128,19 @@ export function generateBoardPDFBlob(
 	boardNumber: number,
 	showFreeSpace: boolean = true
 ): Promise<Buffer> {
-	return new Promise((resolve, reject) => {
-		try {
-			const docDefinition = generateSingleBoardPDF(board, boardNumber, showFreeSpace);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(pdfMake as any).createPdf(docDefinition).getBuffer((buffer: Buffer) => {
-				resolve(buffer);
-			});
-		} catch (error) {
-			reject(error);
-		}
-	});
+    return new Promise((resolve, reject) => {
+        try {
+            const docDefinition = generateSingleBoardPDF(board, boardNumber, showFreeSpace);
+            const pdfDoc = printer.createPdfKitDocument(docDefinition);
+            const chunks: Buffer[] = [];
+            pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk));
+            pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+            pdfDoc.on('error', reject);
+            pdfDoc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
 }
 
 /**
@@ -148,24 +150,15 @@ export function generateBingoBoardsPDF(
 	boards: BingoBoard[],
 	showFreeSpace: boolean = true
 ): Promise<Buffer> {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const content: any[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const content: any[] = [];
 
 	boards.forEach((board, index) => {
 		const table = boardToPDFTable(board, showFreeSpace);
 
-		// Add title
-		content.push({
-			text: `Bingo Board #${index + 1}`,
-			fontSize: 18,
-			bold: true,
-			alignment: 'center',
-			margin: [0, index === 0 ? 20 : 0, 0, 20],
-			pageBreak: index === 0 ? undefined : 'before'
-		});
-
-		// Add table
-		content.push({
+        // Add table (new page before every board except first)
+        content.push({
+            pageBreak: index === 0 ? undefined : 'before',
 			table: {
 				body: table.body,
 				widths: table.widths,
@@ -186,24 +179,27 @@ export function generateBingoBoardsPDF(
 		});
 	});
 
-	return new Promise((resolve, reject) => {
-		try {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const docDefinition: any = {
-				content,
-				pageSize: 'A4',
-				pageOrientation: 'portrait',
-				pageMargins: [40, 40, 40, 40]
-			};
+    return new Promise((resolve, reject) => {
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const docDefinition: any = {
+                content,
+                pageSize: 'A4',
+                pageOrientation: 'portrait',
+                pageMargins: [40, 40, 40, 40],
+                defaultStyle: { font: 'NotoSansJP' }
+            };
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(pdfMake as any).createPdf(docDefinition).getBuffer((buffer: Buffer) => {
-				resolve(buffer);
-			});
-		} catch (error) {
-			reject(error);
-		}
-	});
+            const pdfDoc = printer.createPdfKitDocument(docDefinition);
+            const chunks: Buffer[] = [];
+            pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk));
+            pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+            pdfDoc.on('error', reject);
+            pdfDoc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
 }
 
 /**
