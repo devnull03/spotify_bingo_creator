@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { fetchPlaylist } from './data.remote';
-	import BingoGenerator from '$lib/components/BingoGenerator.svelte';
+	import BingoPrinter from '$lib/components/BingoPrinter.svelte';
 
 	let playlistLink = $state('');
 	let error: string | null = $state(null);
 	let playlistData = $state<Awaited<ReturnType<typeof fetchPlaylist>> | null>(null);
-	let showBingo = $state(false);
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		error = null;
 		playlistData = null;
-		showBingo = false;
 
 		if (!playlistLink.trim()) {
 			error = 'Please enter a Spotify playlist link';
@@ -20,7 +18,6 @@
 
 		try {
 			playlistData = await fetchPlaylist(playlistLink.trim());
-			showBingo = true;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'An error occurred';
 		}
@@ -114,13 +111,13 @@
 		{/if}
 
 		<!-- Bingo Board Generator -->
-		{#if showBingo && playlistData}
+		{#if playlistData}
 			<div class="mt-12 pt-8 border-t border-gray-700">
-				<h2 class="text-3xl font-bold mb-2">Generate Bingo Boards</h2>
+				<h2 class="text-3xl font-bold mb-2">Generate Printable Bingo Boards</h2>
 				<p class="text-gray-400 mb-8">
-					Create interactive bingo cards using songs from your playlist
+					Create and print bingo boards using songs from your playlist
 				</p>
-				<BingoGenerator playlist={playlistData} />
+				<BingoPrinter playlist={playlistData} />
 			</div>
 		{/if}
 

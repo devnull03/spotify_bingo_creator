@@ -28,21 +28,25 @@ function shuffleArray<T>(array: T[]): T[] {
  * Generate a Spotify bingo board (5x5 by default)
  * @param songs Array of songs to use for bingo
  * @param size Board size (default: 5 for 5x5 board)
+ * @param includeFreeSpace Whether to include a free space in the center (5x5 only)
  * @returns BingoBoard object with cells
  */
 export function generateSpotifyBingo(
 	songs: PlaylistSongInfo[],
-	size: number = 5
+	size: number = 5,
+	includeFreeSpace: boolean = true
 ): BingoBoard {
-	if (songs.length < size * size) {
+	const cellCount = size * size - (includeFreeSpace && size === 5 ? 1 : 0);
+
+	if (songs.length < cellCount) {
 		throw new Error(
-			`Need at least ${size * size} songs to generate a ${size}x${size} bingo board. Got ${songs.length}.`
+			`Need at least ${cellCount} songs to generate a ${size}x${size} bingo board. Got ${songs.length}.`
 		);
 	}
 
 	// Shuffle and select random songs
 	const shuffled = shuffleArray(songs);
-	const selectedSongs = shuffled.slice(0, size * size);
+	const selectedSongs = shuffled.slice(0, cellCount);
 
 	// Create 2D grid
 	const cells: BingoCell[][] = [];
@@ -51,17 +55,21 @@ export function generateSpotifyBingo(
 	for (let row = 0; row < size; row++) {
 		cells[row] = [];
 		for (let col = 0; col < size; col++) {
-			cells[row][col] = {
-				id: `${row}-${col}`,
-				song: selectedSongs[songIndex++],
-				marked: false
-			};
+			// Skip center cell if it's a 5x5 and free space is included
+			if (size === 5 && includeFreeSpace && row === 2 && col === 2) {
+				cells[row][col] = {
+					id: `${row}-${col}`,
+					song: { id: 'free', name: 'FREE', artist: 'SPACE', artists: [], uri: '', link: '', image: null, durationMs: 0 } as PlaylistSongInfo,
+					marked: true
+				};
+			} else {
+				cells[row][col] = {
+					id: `${row}-${col}`,
+					song: selectedSongs[songIndex++],
+					marked: false
+				};
+			}
 		}
-	}
-
-	// For a 5x5 board, mark the center cell as a free space
-	if (size === 5) {
-		cells[2][2].marked = true;
 	}
 
 	return {
@@ -69,6 +77,29 @@ export function generateSpotifyBingo(
 		cells,
 		size
 	};
+}
+
+/**
+ * Generate multiple unique bingo boards
+ * @param songs Array of songs to use
+ * @param count Number of boards to generate
+ * @param size Board size
+ * @param includeFreeSpace Whether to include free space
+ * @returns Array of BingoBoard objects
+ */
+export function generateMultipleBoards(
+	songs: PlaylistSongInfo[],
+	count: number,
+	size: number = 5,
+	includeFreeSpace: boolean = true
+): BingoBoard[] {
+	const boards: BingoBoard[] = [];
+
+	for (let i = 0; i < count; i++) {
+		boards.push(generateSpotifyBingo(songs, size, includeFreeSpace));
+	}
+
+	return boards;
 }
 
 /**
